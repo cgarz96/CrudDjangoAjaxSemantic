@@ -3,110 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load staticfiles %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
-    {% load static %}
-    <script src="{% static 'CRUD/js/script.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script> 
     <title>Bienvenido</title>
 </head>
 <body onload="obtenerRegistros();">
-    <br>
-<div class="ui raised very padded text container segment">
-   <form class="ui form" method="POST" action="/cargarDatosPersonales/">
-    {% csrf_token %}
-    <h4 class="ui dividing header">Datos Personales </h4>
-    <div class="two fields">
-        <div class="field">
-          <label>Nombre</label>
-          <input type="text" name="nombre" autocomplete="off" required>
-        </div>
-        <div class="field">
-          <label>Apellido</label>
-          <input type="text" name="apellido" autocomplete="off" required>
-        </div>
-      </div>
-      <div class="field">
-        <div class="fields">
-          <div class="ten wide field">
-            <label>Correo</label>
-            <input type="email" name="correo" autocomplete="off" required>
+ <br>
+ <!-----------------------------------------Formulario------------------------------------------>
+  <div class="ui raised very padded text container segment">
+    <form class="ui form" method="POST" action="/cargarDatosPersonales/" id="formularioIngreso">
+      {% csrf_token %}
+      <h4 class="ui dividing header">Datos Personales </h4>
+      <div class="two fields">
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" name="nombre" autocomplete="off" required>
           </div>
-          <div class="six wide field">
-            <label>Fecha de nacimiento</label>
-            <input type="date" name="fechaNacimiento" autocomplete="off" required >
+          <div class="field">
+            <label>Apellido</label>
+            <input type="text" name="apellido" autocomplete="off" required>
           </div>
         </div>
-      </div>
-  <button class="ui black button " type="submit">Guardar</button>
-</form>
+        <div class="field">
+          <div class="fields">
+            <div class="ten wide field">
+              <label>Correo</label>
+              <input type="email" name="correo" autocomplete="off" required>
+            </div>
+            <div class="six wide field">
+              <label>Fecha de nacimiento</label>
+              <input type="date" name="fechaNacimiento" autocomplete="off" required >
+            </div>
+          </div>
+        </div>
+     <button class="ui black button " type="submit">Guardar</button>
+  </form>
 </div>
+
+ <!-----------------------------------------Tabla------------------------------------------>
 
 <table class="ui fixed single line celled table">
     <thead>
       <tr><th>Nombre</th>
       <th>Apellido</th>
       <th>Correo</th>
-      <th>Edad</th>
+      <th>Edad (en años)</th>
       <th>Accion</th>
     </tr></thead>
     <tbody id="insertarPersonaTabla">
     </tbody>
-  </table>
+</table>
 
+<!-----------------------------------------Modal------------------------------------------>
+
+<div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Editar datos personales
+  </div>
+    <div class="ui form raised very padded text container segment">
+      <form action="/actualizarPersona/" id="formularioEditar" method="POST">
+        {% csrf_token %}
+        <div class="field" >
+          <input type="hidden" name="id" id="idPersona" autocomplete="off" >
+        </div>
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="nombre" id="editarNombre" autocomplete="off" >
+        </div>
+        <div class="field">
+          <label>Apellido</label>
+          <input type="text" name="apellido" id="editarApellido" autocomplete="off" >
+        </div>
+        <div class="field">
+          <label>Correo</label>
+          <input type="email" name="email" id="editarEmail" autocomplete="off" >
+        </div>
+        <div class="field">
+          <label>Fecha de nacimiento</label>
+          <input type="date" name="fechaNacimiento" id="editarFechaNacimiento" autocomplete="off">
+        </div>
+      </form> 
+    </div>
+    <div class="actions">
+      <div class="ui black deny button">
+        Cancelar
+      </div>
+      <div class="ui positive right labeled icon button" onclick="guardarCambios();">
+        Guardar cambios
+        <i class="checkmark icon"></i>
+      </div>
+    </div>
+  </div>
 </body>
-{% block javascript %}
-
-
-<script>$( "form" ).submit(function( event ) {
-  event.preventDefault();
-  var form = $(this);
-$.ajax({
-  url: form.attr("action"),
-  data: form.serialize(),
-  type: form.attr("method"),
-  success: function (data) {
-  console.log(data)
-        $("#insertarPersonaTabla").append(` 
-            <th>`+data.nombre+`</th>
-            <th>`+data.apellido+`</th>
-            <th>`+data.correo+`</th>
-            <th>`+data.fecha+`</th>
-            <th><button class="ui green button" onclick="editarPersona();">Editar</button>
-            <button class="ui red button" onclick="eliminarPersona();">Borrar</button></th>
-          </tr>`)
-  },
-  error:function(data) {
-      console.log("No se ha podido obtener la información");
-  }
-});
-});
-function obtenerRegistros () {
-  $.ajax({
-  url:"/motrarPersonas/",
-  data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
-  type: "POST",
-  success: function (data) {
-  console.log(data)
-
-      for (var index = 0; index < data.length; index++) {
-        $("#insertarPersonaTabla").append(`<tr>
-          <th>`+data[index].fields.nombre+`</th>
-          <th>`+data[index].fields.apellido+`</th>
-          <th>`+data[index].fields.correo+`</th>
-          <th>`+data[index].fields.fechaNacimiento+`</th>
-          <th><button class="ui green button" onclick="editarPersona();">Editar</button>
-            <button class="ui red button" onclick="eliminarPersona();">Borrar</button></th>
-        </tr>`)
-  }
-  },
-  error:function(data) {
-      console.log("No se ha podido obtener la información");
-  }
-});
-}
-
-
-</script>
-{% endblock %}
 </html>
+<script>
+  var csrftoken = '{{ csrf_token }}';
+</script>
+ {% block javascript %}  
+    <script src="{% static 'js/funciones.js' %}"></script>
+  {% endblock %}

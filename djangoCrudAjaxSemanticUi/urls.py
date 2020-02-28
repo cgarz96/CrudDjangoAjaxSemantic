@@ -20,6 +20,9 @@ from CRUD import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.inicio, name='principal'),
-    path('cargarDatosPersonales/', views.cargaPersona, name='cargaDatosPersona'),
-    path('motrarPersonas/', views.listaCompleta, name='DatosPersonas'),
+    path('cargarDatosPersonales/', views.cargarPersona, name='cargaDatosPersona'),#CREATE
+    path('motrarPersonas/', views.listaCompleta, name='DatosPersonas'),#READ
+    path('obtenerPersona/', views.obtenerPersona, name='DatoPersona'),
+    path('actualizarPersona/', views.actualizarDatosPersona, name='actualizarDatosPersona'),#UPDATE
+    path('eliminarDatosPersonales/', views.eliminarPersona, name='eliminarDatosPersona'),#DELETE
 ]

@@ -9,23 +9,12 @@ import json
 def inicio(request):
     return render(request, "inicio.html")
 
-def cargaPersona(request):
+def cargarPersona(request):
     if request.method == 'POST':
-      nombre=request.POST['nombre']
-      apellido=request.POST['apellido']
-      fecha=request.POST['fechaNacimiento']
-      correo=request.POST['correo']
       form=formularioPersona(request.POST)
       if form.is_valid():
         form.save()
-        idPersona =  Persona.objects.last()
-        response_data = {}
-        response_data['id'] = str(idPersona)
-        response_data['nombre'] = nombre
-        response_data['fecha'] = fecha
-        response_data['apellido'] = apellido
-        response_data['correo'] = correo
-    return HttpResponse(json.dumps(response_data), content_type="application/json")
+    return HttpResponse("Ok")
 
 def listaCompleta(parameter_list):
   data =  serializers.serialize('json',Persona.objects.all() )
@@ -33,3 +22,28 @@ def listaCompleta(parameter_list):
   return HttpResponse(json.dumps(list(serializado)), content_type="application/json")
     
     
+def obtenerPersona(request):
+  if request.method=='POST':
+    persona= serializers.serialize('json',Persona.objects.filter(pk=request.POST['id'] ))
+    personaSerializado=json.loads(persona)
+    return HttpResponse( json.dumps(personaSerializado), content_type='application/json' )  
+  else:
+      return HttpResponse("Ocurrio un error en la consulta de id de Persona")
+
+
+
+def actualizarDatosPersona(request):
+    pk = request.POST.get('id')
+    nombre = request.POST.get('nombre')
+    apellido = request.POST.get('apellido')
+    correo = request.POST.get('email')
+    fechaNacimiento = request.POST.get('fechaNacimiento')
+    identificador = Persona.objects.filter(pk=pk)
+    identificador.update(nombre=nombre,apellido=apellido,correo=correo,fechaNacimiento=fechaNacimiento)
+    return HttpResponse("Actualizado")
+
+def eliminarPersona(request):
+    pk = request.POST.get('id')
+    identificador = Persona.objects.filter(pk=pk)
+    identificador.delete()
+    return HttpResponse("Eliminado")
